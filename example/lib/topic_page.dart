@@ -33,8 +33,7 @@ class TopicPage extends StatelessWidget {
                             child: InkWell(
                                 child: Text(
                                   'More information',
-                                  style: TextStyle(
-                                      color: Theme.of(context).accentColor),
+                                  style: TextStyle(color: Colors.blue),
                                 ),
                                 onTap: () => launch(topic.url!)),
                           ),
