@@ -27,14 +27,14 @@ extension Uint8Pointer on Pointer<Uint8> {
 
 extension Uint8ListExtensions on Uint8List {
   Pointer<Uint8> toPointer({int? size}) {
-    final p = calloc<Uint8>(size ?? this.length);
-    p.asTypedList(size ?? this.length).setAll(0, this);
+    final p = calloc<Uint8>(size ?? length);
+    p.asTypedList(size ?? length).setAll(0, this);
     return p;
   }
 
   Uint8List toNullTerminatedList({int? maxLength}) {
-    if ((maxLength == null || this.length < maxLength) && this.last != 0) {
-      return new Uint8List(this.length + 1)..setAll(0, this);
+    if ((maxLength == null || length < maxLength) && last != 0) {
+      return Uint8List(length + 1)..setAll(0, this);
     }
 
     // return unchanged

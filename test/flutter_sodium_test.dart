@@ -33,11 +33,11 @@ void main() {
     });
 
     test('pwhash', () {
-      final outlen = 16;
+      const outlen = 16;
       final passwd = utf8.encoder.convert('hello world');
       final salt = Sodium.hex2bin('10fb7e754a23de756aacb30f810f23df');
-      final opslimit = 1;
-      final memlimit = 8192;
+      const opslimit = 1;
+      const memlimit = 8192;
       final alg = Sodium.cryptoPwhashAlgDefault;
 
       final hash =

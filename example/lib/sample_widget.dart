@@ -3,18 +3,18 @@ import 'toc.dart';
 
 class SampleWidget extends StatelessWidget {
   final Sample sample;
-  SampleWidget(this.sample);
+  const SampleWidget(this.sample, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Text(sample.title ?? '(no title)',
-              style: Theme.of(context).textTheme.headline5)),
-      if (sample.description != null && sample.description!.length > 0)
+              style: Theme.of(context).textTheme.headlineSmall)),
+      if (sample.description != null && sample.description!.isNotEmpty)
         Padding(
-          padding: EdgeInsets.only(bottom: 16.0),
+          padding: const EdgeInsets.only(bottom: 16.0),
           child: Text(sample.description!),
         ),
       CodeBlock(sample.code),
@@ -26,7 +26,7 @@ class SampleWidget extends StatelessWidget {
 class SampleRunner extends StatefulWidget {
   final Sample sample;
 
-  SampleRunner(this.sample);
+  const SampleRunner(this.sample, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _SampleRunnerState();
@@ -57,7 +57,8 @@ class _SampleRunnerState extends State<SampleRunner> {
   Widget build(BuildContext context) {
     if (_sampleRun == null) {
       return Padding(
-          padding: EdgeInsets.only(top: 16.0), child: RunButton(_runSample));
+          padding: const EdgeInsets.only(top: 16.0),
+          child: RunButton(_runSample));
     }
 
     return FutureBuilder(
@@ -67,19 +68,19 @@ class _SampleRunnerState extends State<SampleRunner> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: RunButton(
                           snapshot.connectionState == ConnectionState.done
                               ? _runSample
                               : null)),
                   Padding(
-                      padding: EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text('Result',
-                          style: Theme.of(context).textTheme.headline6)),
+                          style: Theme.of(context).textTheme.titleLarge)),
                   // display progress only for async code snippets
                   if (widget.sample.funcAsync != null &&
                       snapshot.connectionState != ConnectionState.done)
-                    LinearProgressIndicator(),
+                    const LinearProgressIndicator(),
                   AnimatedOpacity(
                       opacity: snapshot.connectionState == ConnectionState.done
                           ? 1
@@ -103,11 +104,11 @@ class _SampleRunnerState extends State<SampleRunner> {
 class RunButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
-  RunButton(this.onPressed);
+  const RunButton(this.onPressed, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(child: Text('Run'), onPressed: onPressed);
+    return ElevatedButton(onPressed: onPressed, child: const Text('Run'));
   }
 }
 
@@ -115,14 +116,15 @@ class CodeBlock extends StatelessWidget {
   final String? _code;
   final Color color;
 
-  CodeBlock(this._code, {this.color = Colors.black12});
+  const CodeBlock(this._code, {Key? key, this.color = Colors.black12})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         color: color,
         child: Text(_code ?? '(code not found)',
-            style: TextStyle(fontFamily: 'RobotoMono', fontSize: 12.0)));
+            style: const TextStyle(fontSize: 12.0)));
   }
 }

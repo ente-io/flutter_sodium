@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium_example/sample_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'toc.dart';
 
 class TopicPage extends StatelessWidget {
   final Topic topic;
 
-  TopicPage(this.topic);
+  const TopicPage(this.topic, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,32 +17,31 @@ class TopicPage extends StatelessWidget {
         body: SafeArea(
             child: SingleChildScrollView(
                 child: Container(
-                    padding: EdgeInsets.all(15.0),
+                    padding: const EdgeInsets.all(15.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         // description
                         if (topic.description != null)
                           Padding(
-                              padding: EdgeInsets.only(bottom: 16.0),
+                              padding: const EdgeInsets.only(bottom: 16.0),
                               child: Text(topic.description!)),
                         // more info button
                         if (topic.url != null)
                           Padding(
-                            padding: EdgeInsets.only(bottom: 16.0),
+                            padding: const EdgeInsets.only(bottom: 16.0),
                             child: InkWell(
-                                child: Text(
+                                child: const Text(
                                   'More information',
-                                  style: TextStyle(
-                                      color: Theme.of(context).accentColor),
+                                  style: TextStyle(color: Colors.blue),
                                 ),
-                                onTap: () => launch(topic.url!)),
+                                onTap: () => launchUrlString(topic.url!)),
                           ),
                         // 0..n samples
                         if (topic.samples != null)
                           for (var sample in topic.samples!)
                             Padding(
-                                padding: EdgeInsets.only(bottom: 16.0),
+                                padding: const EdgeInsets.only(bottom: 16.0),
                                 child: SampleWidget(sample))
                       ],
                     )))));

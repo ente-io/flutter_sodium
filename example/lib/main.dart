@@ -6,10 +6,12 @@ import 'topic_page.dart';
 void main() {
   Sodium.init();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,17 +19,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('flutter_sodium'),
+          title: const Text('flutter_sodium'),
         ),
         body: SafeArea(
             child: FutureBuilder(
@@ -46,11 +50,12 @@ class HomePage extends StatelessWidget {
                                       title: Text(topic.title,
                                           style: Theme.of(context)
                                               .textTheme
-                                              .headline6))
+                                              .titleLarge))
                                 else
                                   ListTile(
                                       title: Text(topic.title),
-                                      trailing: Icon(Icons.arrow_forward_ios,
+                                      trailing: const Icon(
+                                          Icons.arrow_forward_ios,
                                           size: 12.0),
                                       onTap: () => Navigator.push(
                                           context,

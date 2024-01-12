@@ -23,7 +23,7 @@ class Samples {
 
   void api2(Function(Object) print) {
     // BEGIN api2: High-level API: Compute a password hash using the high-level API with predefined salt.
-    final p = 'hello world';
+    const p = 'hello world';
     final h = PasswordHash.hashString(p, salt);
 
     print('salt: ${Sodium.bin2hex(salt)}');
@@ -155,7 +155,7 @@ class Samples {
     final k = CryptoAuth.randomKey();
 
     // compute tag
-    final m = 'hello world';
+    const m = 'hello world';
     final t = CryptoAuth.computeString(m, k);
     print(Sodium.bin2hex(t));
 
@@ -173,7 +173,7 @@ class Samples {
     final n = CryptoBox.randomNonce();
 
     // Alice encrypts message for Bob
-    final m = 'hello world';
+    const m = 'hello world';
     final e = CryptoBox.encryptString(m, n, b.pk, a.sk);
 
     print(Sodium.bin2hex(e));
@@ -194,7 +194,7 @@ class Samples {
     final n = CryptoBox.randomNonce();
 
     // Alice encrypts message for Bob
-    final m = 'hello world';
+    const m = 'hello world';
     final c = CryptoBox.encryptStringDetached(m, n, b.pk, a.sk);
 
     print('cipher: ${Sodium.bin2hex(c.c)}');
@@ -216,7 +216,7 @@ class Samples {
     final n = CryptoBox.randomNonce();
 
     // Alice encrypts message for Bob
-    final m = 'hello world';
+    const m = 'hello world';
     final e = CryptoBox.encryptString(m, n, b.pk, a.sk);
 
     print(Sodium.bin2hex(e));
@@ -239,7 +239,7 @@ class Samples {
 
     // Alice encrypts message for Bob (precalculated)
     final k = CryptoBox.sharedSecret(b.pk, a.sk);
-    final m = 'hello world';
+    const m = 'hello world';
     final c = CryptoBox.encryptStringDetachedAfternm(m, n, k);
 
     print('cipher: ${Sodium.bin2hex(c.c)}');
@@ -259,7 +259,7 @@ class Samples {
     final k = SealedBox.randomKeys();
 
     // Anonymous sender encrypts a message using an ephemeral key pair and the recipient's public key
-    final m = 'hello world';
+    const m = 'hello world';
     final c = SealedBox.sealString(m, k.pk);
 
     print('cipher: ${Sodium.bin2hex(c)}');
@@ -279,7 +279,7 @@ class Samples {
     final n = SecretBox.randomNonce();
 
     // encrypt
-    final m = 'hello world';
+    const m = 'hello world';
     final e = SecretBox.encryptString(m, n, k);
     print(Sodium.bin2hex(e));
 
@@ -296,7 +296,7 @@ class Samples {
     final n = SecretBox.randomNonce();
 
     // encrypt
-    final m = 'hello world';
+    const m = 'hello world';
     final c = SecretBox.encryptStringDetached(m, n, k);
     print('cipher: ${Sodium.bin2hex(c.c)}');
     print('mac: ${Sodium.bin2hex(c.mac)}');
@@ -310,7 +310,7 @@ class Samples {
 
   void sign1(Function(Object) print) {
     // BEGIN sign1: Combined mode: Compute a signed message
-    final m = 'hello world';
+    const m = 'hello world';
     final k = CryptoSign.randomKeys();
 
     // sign with secret key
@@ -331,7 +331,7 @@ class Samples {
     final k = CryptoSign.randomKeys();
 
     // Author computes signature using secret key
-    final m = 'hello world';
+    const m = 'hello world';
     final s = CryptoSign.signStringDetached(m, k.sk);
     print(Sodium.bin2hex(s));
 
@@ -392,7 +392,7 @@ class Samples {
 
   void generic1(Function(Object) print) {
     // BEGIN generic1: Single-part without a key:
-    final v = 'Arbitrary data to hash';
+    const v = 'Arbitrary data to hash';
     final h = GenericHash.hashString(v);
 
     print(Sodium.bin2hex(h));
@@ -401,7 +401,7 @@ class Samples {
 
   void generic2(Function(Object) print) {
     // BEGIN generic2: Single-part with a key:
-    final v = 'Arbitrary data to hash';
+    const v = 'Arbitrary data to hash';
     final k = GenericHash.randomKey();
 
     final h = GenericHash.hashString(v, key: k);
@@ -434,7 +434,7 @@ class Samples {
 
   void pwhash1(Function(Object) print) {
     // BEGIN pwhash1: Hash: Derives a hash from given password and salt.
-    final p = 'hello world';
+    const p = 'hello world';
     final s = PasswordHash.randomSalt();
     final h = PasswordHash.hashString(p, s);
 
@@ -444,7 +444,7 @@ class Samples {
 
   void pwhash2(Function(Object) print) {
     // BEGIN pwhash2: Hash storage: Computes a password verification string for given password.
-    final p = 'hello world';
+    const p = 'hello world';
     final s = PasswordHash.hashStringStorage(p);
     print(s);
 
@@ -461,7 +461,7 @@ class Samples {
     w.start();
 
     // compute hash
-    final p = 'hello world';
+    const p = 'hello world';
     final s = await compute(PasswordHash.hashStringStorageModerate, p);
 
     print(s);
@@ -472,7 +472,7 @@ class Samples {
 
   void shorthash1(Function(Object) print) {
     // BEGIN shorthash1: Usage: Computes a fixed-size fingerprint for given string value and key.
-    final m = 'hello world';
+    const m = 'hello world';
     final k = ShortHash.randomKey();
     final h = ShortHash.hashString(m, k);
 
@@ -551,8 +551,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c = ChaCha20Poly1305.encryptString(m, n, k, additionalData: d);
 
     print('cipher: ${Sodium.bin2hex(c)}');
@@ -573,8 +573,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c =
         ChaCha20Poly1305.encryptStringDetached(m, n, k, additionalData: d);
 
@@ -598,8 +598,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c = ChaCha20Poly1305Ietf.encryptString(m, n, k, additionalData: d);
 
     print('cipher: ${Sodium.bin2hex(c)}');
@@ -620,8 +620,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c =
         ChaCha20Poly1305Ietf.encryptStringDetached(m, n, k, additionalData: d);
 
@@ -645,8 +645,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c = XChaCha20Poly1305Ietf.encryptString(m, n, k, additionalData: d);
 
     print('cipher: ${Sodium.bin2hex(c)}');
@@ -667,8 +667,8 @@ class Samples {
     print('key: ${Sodium.bin2hex(k)}');
 
     // encrypt
-    final m = 'hello world';
-    final d = '123456';
+    const m = 'hello world';
+    const d = '123456';
     final c =
         XChaCha20Poly1305Ietf.encryptStringDetached(m, n, k, additionalData: d);
 
@@ -685,7 +685,7 @@ class Samples {
 
   void onetime1(Function(Object) print) {
     // BEGIN onetime1: Single-part:
-    final m = 'hello world';
+    const m = 'hello world';
     final k = OnetimeAuth.randomKey();
     final t = OnetimeAuth.computeString(m, k);
     print(Sodium.bin2hex(t));
@@ -707,7 +707,7 @@ class Samples {
 
   void hash1(Function(Object) print) {
     // BEGIN hash1: Usage: SHA-512 hashing
-    final m = 'hello world';
+    const m = 'hello world';
     final h = Hash.hashString(m);
     print(Sodium.bin2hex(h));
     // END hash1

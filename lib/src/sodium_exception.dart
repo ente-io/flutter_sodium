@@ -4,5 +4,6 @@ class SodiumException {
   SodiumException(this.message);
 
   /// Returns a string representation of this object.
+  @override
   String toString() => message;
 }

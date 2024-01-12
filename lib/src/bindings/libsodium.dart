@@ -13,9 +13,23 @@ DynamicLibrary _load() {
     return DynamicLibrary.process();
   }
   if (Platform.isMacOS) {
+    String? path;
     // assuming user installed libsodium as per the installation instructions
     // see also https://libsodium.gitbook.io/doc/installation
-    return DynamicLibrary.open('/usr/local/lib/libsodium.dylib');
+    final paths = [
+      '/usr/local/lib/libsodium.dylib',
+      '/opt/homebrew/lib/libsodium.dylib'
+    ];
+    for (final p in paths) {
+      if (File(p).existsSync()) {
+        path = p;
+        break;
+      }
+    }
+    if (path == null) {
+      throw SodiumException('cannot find associated path');
+    }
+    return DynamicLibrary.open(path);
   }
   if (Platform.isLinux) {
     // assuming user installed libsodium as per the installation instructions
@@ -35,6 +49,6 @@ DynamicLibrary _load() {
 // almost works, but is sign extended.
 extension Bindings on DynamicLibrary {
   int Function() lookupSizet(String symbolName) => sizeOf<IntPtr>() == 4
-      ? this.lookup<NativeFunction<Uint32 Function()>>(symbolName).asFunction()
-      : this.lookup<NativeFunction<Uint64 Function()>>(symbolName).asFunction();
+      ? lookup<NativeFunction<Uint32 Function()>>(symbolName).asFunction()
+      : lookup<NativeFunction<Uint64 Function()>>(symbolName).asFunction();
 }
