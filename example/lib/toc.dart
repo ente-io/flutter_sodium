@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'samples.dart';
 
-typedef void SampleFunc(Function(Object) print);
-typedef Future SampleFuncAsync(Function(Object) print);
+typedef SampleFunc = void Function(Function(Object) print);
+typedef SampleFuncAsync = Future Function(Function(Object) print);
 
 class Section extends Topic {
   Section(String title) : super(title);
@@ -241,7 +241,7 @@ String _formatCode(String code) {
   for (var i = 0; i < lines.length; i++) {
     String line = lines[i];
     // skip empty first and last lines
-    if (line.trim().length == 0 && (i == 0 || i == lines.length - 1)) {
+    if (line.trim().isEmpty && (i == 0 || i == lines.length - 1)) {
       continue;
     }
     // determine indent

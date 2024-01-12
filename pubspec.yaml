@@ -13,6 +13,7 @@ dependencies:
   ffi: ">=2.0.1 <3.0.0"
 
 dev_dependencies:
+  flutter_lints:
   flutter_test:
     sdk: flutter
 
@@ -21,7 +22,6 @@ platforms:
   ios:
   linux:
   macos:
-  web:
   windows:
 
 flutter:
