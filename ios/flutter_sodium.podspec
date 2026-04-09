@@ -15,12 +15,19 @@ A new Flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '8.0'
+  s.platform = :ios, '14.0'
+  s.preserve_paths = 'prebuilt/*'
 
   # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'
+  }
   s.swift_version = '5.0'
-  s.xcconfig = { 'OTHER_LDFLAGS' => '-force_load "${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/libsodium.a"'}
+  s.xcconfig = {
+    'OTHER_LDFLAGS[sdk=iphoneos*]' => '-force_load "${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-device.a"',
+    'OTHER_LDFLAGS[sdk=iphonesimulator*]' => '-force_load "${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-simulator.a"'
+  }
 
   # If your plugin requires a privacy manifest, for example if it uses any
   # required reason APIs, update the PrivacyInfo.xcprivacy file to describe your

@@ -1,0 +1,10 @@
+{
+  "libsodium_version": "1.0.21",
+  "source_url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.21.tar.gz",
+  "source_sha256": "9e4285c7a419e82dedb0be63a72eea357d6943bc3e28e6735bf600dd4883feaf",
+  "min_ios_version": "14.0",
+  "device_archive": "libsodium-device.a",
+  "device_archs": ["arm64"],
+  "simulator_archive": "libsodium-simulator.a",
+  "simulator_archs": ["arm64", "x86_64"]
+}
