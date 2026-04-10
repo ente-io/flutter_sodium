@@ -25,8 +25,9 @@ A new Flutter plugin project.
   }
   s.swift_version = '5.0'
   s.xcconfig = {
-    'OTHER_LDFLAGS[sdk=iphoneos*]' => '-force_load "${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-device.a"',
-    'OTHER_LDFLAGS[sdk=iphonesimulator*]' => '-force_load "${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-simulator.a"'
+    'LIBSODIUM_ARCHIVE' => '${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-device.a',
+    'LIBSODIUM_ARCHIVE[sdk=iphonesimulator*]' => '${PODS_ROOT}/../.symlinks/plugins/flutter_sodium/ios/prebuilt/libsodium-simulator.a',
+    'OTHER_LDFLAGS' => '-force_load "${LIBSODIUM_ARCHIVE}"'
   }
 
   # If your plugin requires a privacy manifest, for example if it uses any
