@@ -23,7 +23,10 @@ DEVICE_OUTPUT="${PREBUILT_DIR}/libsodium-device.a"
 SIMULATOR_OUTPUT="${PREBUILT_DIR}/libsodium-simulator.a"
 BUILD_INFO_OUTPUT="${PREBUILT_DIR}/libsodium-build-info.json"
 
-JOBS="${JOBS:-$(sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+XCODE_VERSION=""
+XCODE_BUILD_VERSION=""
+IPHONEOS_SDK_VERSION=""
+IPHONESIMULATOR_SDK_VERSION=""
 
 log() {
   printf '==> %s\n' "$*"
@@ -31,7 +34,7 @@ log() {
 
 ensure_commands() {
   local command
-  for command in curl shasum tar make xcrun lipo; do
+  for command in curl grep shasum tar make xcodebuild xcrun lipo sed; do
     if ! command -v "${command}" >/dev/null 2>&1; then
       printf 'Missing required command: %s\n' "${command}" >&2
       exit 1
@@ -67,64 +70,105 @@ extract_source() {
   printf '%s/libsodium-%s\n' "${destination}" "${LIBSODIUM_VERSION}"
 }
 
-build_target() {
-  local name="$1"
-  local sdk="$2"
-  local arch="$3"
-  local host="$4"
-  local version_flag="$5"
-  local prefix="$6"
-  local source_root="$7"
+sha256_file() {
+  shasum -a 256 "$1" | awk '{print $1}'
+}
 
-  local sdk_path clang ar ranlib strip source_dir build_triplet config_guess
-  sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path)"
-  clang="$(xcrun --sdk "${sdk}" --find clang)"
-  ar="$(xcrun --sdk "${sdk}" --find ar)"
-  ranlib="$(xcrun --sdk "${sdk}" --find ranlib)"
-  strip="$(xcrun --sdk "${sdk}" --find strip)"
+detect_xcode_metadata() {
+  XCODE_VERSION="$(xcodebuild -version | awk 'NR == 1 { print $2 }')"
+  XCODE_BUILD_VERSION="$(xcodebuild -version | awk 'NR == 2 { print $3 }')"
+  IPHONEOS_SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+  IPHONESIMULATOR_SDK_VERSION="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+}
+
+build_archives_from_upstream() {
+  local source_root="$1"
+
+  local source_dir helper_script split_marker split_marker_count
   source_dir="$(extract_source "${source_root}")"
+  helper_script="${WORK_ROOT}/apple-xcframework-functions.sh"
+  split_marker='mkdir -p "${PREFIX}/tmp"'
 
-  if [[ -x "${source_dir}/config.guess" ]]; then
-    config_guess="${source_dir}/config.guess"
-  elif [[ -x "${source_dir}/build-aux/config.guess" ]]; then
-    config_guess="${source_dir}/build-aux/config.guess"
-  else
-    printf 'Unable to locate config.guess in %s\n' "${source_dir}" >&2
+  if [[ ! -f "${source_dir}/dist-build/apple-xcframework.sh" ]]; then
+    printf 'Unable to locate upstream build script: %s\n' "${source_dir}/dist-build/apple-xcframework.sh" >&2
     exit 1
   fi
 
-  log "Building ${name}"
-  build_triplet="$(${config_guess})"
+  split_marker_count="$(grep -Fxc -- "${split_marker}" "${source_dir}/dist-build/apple-xcframework.sh" || true)"
+  if [[ "${split_marker_count}" != "1" ]]; then
+    printf 'Expected exactly one upstream split marker in %s, found %s\n' \
+      "${source_dir}/dist-build/apple-xcframework.sh" "${split_marker_count}" >&2
+    exit 1
+  fi
 
+  sed '/^mkdir -p "${PREFIX}\/tmp"$/,$d; s#\./configure #./configure --disable-shared --enable-static #g' \
+    "${source_dir}/dist-build/apple-xcframework.sh" > "${helper_script}"
+  if [[ ! -s "${helper_script}" ]]; then
+    printf 'Unable to extract helper definitions from %s\n' "${source_dir}/dist-build/apple-xcframework.sh" >&2
+    exit 1
+  fi
+
+  log "Building iOS archives via dist-build/apple-xcframework.sh"
   pushd "${source_dir}" >/dev/null
-  env \
-    CC="${clang}" \
-    AR="${ar}" \
-    RANLIB="${ranlib}" \
-    STRIP="${strip}" \
-    CFLAGS="-O3 -arch ${arch} -isysroot ${sdk_path} ${version_flag}" \
-    LDFLAGS="-arch ${arch} -isysroot ${sdk_path} ${version_flag}" \
-    ./configure \
-      --build="${build_triplet}" \
-      --host="${host}" \
-      --disable-shared \
-      --enable-static \
-      --prefix="${prefix}"
-  make -j"${JOBS}"
-  make install
+  export IOS_VERSION_MIN="${MIN_IOS_VERSION}"
+  export IOS_SIMULATOR_VERSION_MIN="${MIN_IOS_VERSION}"
+  export LIBSODIUM_MINIMAL_BUILD=""
+  export LIBSODIUM_SKIP_SIMULATORS=""
+  source "${helper_script}"
+  if ! declare -F build_ios >/dev/null 2>&1; then
+    printf 'build_ios was not defined after sourcing %s\n' "${helper_script}" >&2
+    exit 1
+  fi
+  if ! declare -F build_ios_simulator >/dev/null 2>&1; then
+    printf 'build_ios_simulator was not defined after sourcing %s\n' "${helper_script}" >&2
+    exit 1
+  fi
+
+  mkdir -p "${PREFIX}/tmp"
+  if ! ( build_ios ) >"${LOG_FILE}" 2>&1; then
+    printf 'Upstream iOS build failed. See %s\n' "${LOG_FILE}" >&2
+    exit 1
+  fi
+  if ! ( build_ios_simulator ) >>"${LOG_FILE}" 2>&1; then
+    printf 'Upstream iOS build failed. See %s\n' "${LOG_FILE}" >&2
+    exit 1
+  fi
+
+  cp "${IOS64_PREFIX}/lib/libsodium.a" "${DEVICE_OUTPUT}"
+  lipo -create \
+    "${IOS_SIMULATOR_ARM64_PREFIX}/lib/libsodium.a" \
+    "${IOS_SIMULATOR_X86_64_PREFIX}/lib/libsodium.a" \
+    -output "${SIMULATOR_OUTPUT}"
   popd >/dev/null
+
+  xcrun ranlib -D "${DEVICE_OUTPUT}"
+  xcrun ranlib -D "${SIMULATOR_OUTPUT}"
 }
 
 write_build_info() {
+  local device_sha simulator_sha
+  device_sha="$(sha256_file "${DEVICE_OUTPUT}")"
+  simulator_sha="$(sha256_file "${SIMULATOR_OUTPUT}")"
+
   cat > "${BUILD_INFO_OUTPUT}" <<EOF2
 {
   "libsodium_version": "${LIBSODIUM_VERSION}",
   "source_url": "${LIBSODIUM_URL}",
   "source_sha256": "${LIBSODIUM_SHA256}",
+  "xcode_version": "${XCODE_VERSION}",
+  "xcode_build_version": "${XCODE_BUILD_VERSION}",
+  "iphoneos_sdk_version": "${IPHONEOS_SDK_VERSION}",
+  "iphonesimulator_sdk_version": "${IPHONESIMULATOR_SDK_VERSION}",
   "min_ios_version": "${MIN_IOS_VERSION}",
+  "build_variant": "full",
+  "upstream_dist_build_script": "dist-build/apple-xcframework.sh",
+  "upstream_functions_used": ["build_ios", "build_ios_simulator"],
+  "upstream_overrides": ["--disable-shared", "--enable-static"],
   "device_archive": "$(basename "${DEVICE_OUTPUT}")",
+  "device_sha256": "${device_sha}",
   "device_archs": ["arm64"],
   "simulator_archive": "$(basename "${SIMULATOR_OUTPUT}")",
+  "simulator_sha256": "${simulator_sha}",
   "simulator_archs": ["arm64", "x86_64"]
 }
 EOF2
@@ -133,45 +177,10 @@ EOF2
 main() {
   ensure_commands
   download_archive
+  detect_xcode_metadata
 
   mkdir -p "${WORK_ROOT}" "${PREBUILT_DIR}"
-
-  local device_prefix="${WORK_ROOT}/device/install"
-  local sim_arm64_prefix="${WORK_ROOT}/sim-arm64/install"
-  local sim_x86_64_prefix="${WORK_ROOT}/sim-x86_64/install"
-
-  build_target \
-    "iPhoneOS arm64" \
-    "iphoneos" \
-    "arm64" \
-    "aarch64-apple-darwin" \
-    "-mios-version-min=${MIN_IOS_VERSION}" \
-    "${device_prefix}" \
-    "${WORK_ROOT}/device/src"
-
-  build_target \
-    "iPhoneSimulator arm64" \
-    "iphonesimulator" \
-    "arm64" \
-    "aarch64-apple-darwin" \
-    "-mios-simulator-version-min=${MIN_IOS_VERSION}" \
-    "${sim_arm64_prefix}" \
-    "${WORK_ROOT}/sim-arm64/src"
-
-  build_target \
-    "iPhoneSimulator x86_64" \
-    "iphonesimulator" \
-    "x86_64" \
-    "x86_64-apple-darwin" \
-    "-mios-simulator-version-min=${MIN_IOS_VERSION}" \
-    "${sim_x86_64_prefix}" \
-    "${WORK_ROOT}/sim-x86_64/src"
-
-  cp "${device_prefix}/lib/libsodium.a" "${DEVICE_OUTPUT}"
-  lipo -create \
-    "${sim_arm64_prefix}/lib/libsodium.a" \
-    "${sim_x86_64_prefix}/lib/libsodium.a" \
-    -output "${SIMULATOR_OUTPUT}"
+  build_archives_from_upstream "${WORK_ROOT}/src"
 
   write_build_info
 

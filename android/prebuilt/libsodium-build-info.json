@@ -1,0 +1,43 @@
+{
+  "libsodium_version": "1.0.21",
+  "source_url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.21.tar.gz",
+  "source_sha256": "9e4285c7a419e82dedb0be63a72eea357d6943bc3e28e6735bf600dd4883feaf",
+  "android_ndk_version": "28.2.13676358",
+  "android_ndk_release": "r28c",
+  "llvm_prebuilt_host": "darwin-x86_64",
+  "page_alignment_bytes": 16384,
+  "linker_flags": ["-Wl,-z,max-page-size=16384"],
+  "build_variant": "full",
+  "upstream_dist_build_scripts": [
+    "dist-build/android-armv7-a.sh",
+    "dist-build/android-armv8-a.sh",
+    "dist-build/android-x86.sh",
+    "dist-build/android-x86_64.sh"
+  ],
+  "abi_outputs": [
+    {
+      "abi": "armeabi-v7a",
+      "android_api": 21,
+      "library_path": "android/src/main/jniLibs/armeabi-v7a/libsodium.so",
+      "sha256": "b9f6a7cc6ce615c95362d14ab4661039f2b267b188fd9c1b4e37c8d540df780a"
+    },
+    {
+      "abi": "arm64-v8a",
+      "android_api": 21,
+      "library_path": "android/src/main/jniLibs/arm64-v8a/libsodium.so",
+      "sha256": "46d8117341757f5f1328ba947fa09ef8d1e6bf13e7e151c6543d7c1666cc0264"
+    },
+    {
+      "abi": "x86",
+      "android_api": 21,
+      "library_path": "android/src/main/jniLibs/x86/libsodium.so",
+      "sha256": "7d94fddd5a5249c2222853303b1fd36be5b61ff21993e85c43840e4990c6b25c"
+    },
+    {
+      "abi": "x86_64",
+      "android_api": 21,
+      "library_path": "android/src/main/jniLibs/x86_64/libsodium.so",
+      "sha256": "9f4b0f9db22c7d82c7394e916bed06aa2fc5c05b9534e0c872f809eff7c98d79"
+    }
+  ]
+}
